@@ -96,10 +96,10 @@ the first string is always the empty string as indicated by a blank line. Here w
     optimal version of Ax.dfa, you will have this 10 extra points.
 5. **Final Step on Unix Account.** After you finish the project, or has decided that what you have is
     the final version for me to grade, collect or transfer all needed program in the corresponding student’s
-    Unix account and select a secret name, say “`peekapoo`” as an example (you should chose your own),
+    Unix account and select a secret name, say “`peekapoo`” as an example (you should choose your own),
     and that will be the secret directory, and should not give to anyone except the grader (that’s the
-    instructor). Run the following bash script program from corresponding student’s Unix account:<br>
-    `bash /home/ad.ilstu.edu/cli2/Public/IT328/submit328.sh peekapoo`<br>
+    instructor). Run the following bash script program from corresponding student’s Unix account:<br><br>
+    `bash /home/ad.ilstu.edu/cli2/Public/IT328/submit328.sh peekapoo`<br><br>
     Note that your programs have to be in the required directory `∼/IT328/dfa/` as described in step 1
     in order to let this script program correctly copy your programs into the secret directory, where your
     programs will be tested.
