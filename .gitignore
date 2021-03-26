@@ -16,6 +16,9 @@ local.properties
 # Class files
 *.class
 
+# DFA files
+*.dfa
+
 # Locally stored "Eclipse launch configurations"
 *.launch
 
