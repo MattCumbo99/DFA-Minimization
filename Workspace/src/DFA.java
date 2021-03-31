@@ -136,6 +136,7 @@ public class DFA {
 				" on strings attached in " + dfa_filename + ":");
 		
 		// Parse provided strings on provided DFA
+		// XXX: This code is reused twice. Put into a method.
 		ArrayList<ArrayList<Boolean>> strResults = new ArrayList<>();
 		int index = 0;
 		
@@ -172,6 +173,7 @@ public class DFA {
 			System.out.println();
 		}
 		System.out.println("\nYes:" + numYes + " No:" + numNo);
+		/* End of reused code */
 		
 		// Display minimized DFA header
 		System.out.println("\nMinimized DFA from " + dfa_filename + ":");
@@ -191,12 +193,14 @@ public class DFA {
 		calculateMinimized();
 		
 		// Display the actual minimized DFA
-		for (int i = 0; i < minDfa.size(); i++) {
-			System.out.format("%6d:", i);
-			for (int j = 0; j < minDfa.get(i).size(); j++) {
-				System.out.format("%5d", minDfa.get(i).get(j));
+		if (!minDfa.isEmpty()) {
+			for (int i = 0; i < minDfa.size(); i++) {
+				System.out.format("%6d:", i);
+				for (int j = 0; j < minDfa.get(i).size(); j++) {
+					System.out.format("%5d", minDfa.get(i).get(j));
+				}
+				System.out.println();
 			}
-			System.out.println();
 		}
 		
 		// Display line separator
@@ -205,5 +209,70 @@ public class DFA {
 			System.out.print("-----");
 		}
 		System.out.println();
+		
+		// Display minimized DFA closers
+		// Initial state
+		// XXX: Always assumes initial state is 0!
+		System.out.println(" 0: Initial State");
+		
+		// Display accepting states
+		if (!acceptingStates.isEmpty()) {
+			System.out.print(" " + acceptingStates.get(0));
+			for (int i = 1; i < acceptingStates.size(); i++) {
+				System.out.print("," + acceptingStates.get(i));
+			}
+			System.out.println(": Accepting State(s)");
+		}
+		else {
+			System.out.println(" No accepting states");
+		}
+		System.out.println();
+		
+		// Parse provided strings on minimized DFA
+		System.out.println("Parsing results of minimized " + dfa_filename + " on same set of strings:");
+		
+		// Parse strings on minimized DFA
+		index = 0;
+		strResults.clear();
+		strResults.add(new ArrayList<>());
+		for (String s: inStrings) {
+			// If the results pass 15, make a new line
+			if (strResults.get(index).size() == 15) {
+				index++;
+				strResults.add(new ArrayList<>());
+			}
+			// Add the result to the list
+			strResults.get(index).add(parseString(minDfa, s));
+		}
+		numYes = 0;
+		numNo  = 0;
+		
+		// Output the results of the parsed string
+		for (int i = 0; i < strResults.size(); i++) {
+			System.out.print(" ");
+			for (int j = 0; j < strResults.get(i).size(); j++) {
+				// Display Yes
+				if (strResults.get(i).get(j) == true) {
+					System.out.print("Yes  ");
+					numYes++;
+				}
+				// Display No
+				else {
+					System.out.print("No   ");
+					numNo++;
+				}
+			}
+			System.out.println();
+		}
+		System.out.println("\nYes:" + numYes + " No:" + numNo);
 	}
 }
+
+
+
+
+
+
+
+
+
