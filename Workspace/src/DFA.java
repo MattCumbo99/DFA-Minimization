@@ -3,12 +3,18 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Calculates a minimized DFA.
+ * @author Matthew Cumbo
+ * @since  2021-03-31
+ */
 public class DFA {
 	
+	/* Initial DFA variables */
 	// Filename of the .dfa
 	private final String dfa_filename;
 	// Array of sigma chars
-	private char[] sigma;
+	private ArrayList<Character> sigma;
 	// DFA data
 	private ArrayList<ArrayList<Integer>> theDfa;
 	// Initial state
@@ -18,6 +24,12 @@ public class DFA {
 	// List of input strings
 	private ArrayList<String> inStrings;
 	
+	/* Minimized DFA variables */
+	// Minimized DFA data
+	private ArrayList<ArrayList<Integer>> minDfa;
+	// Exit states
+	private ArrayList<Integer> acceptingStates;
+	
 	/**
 	 * Creates a new DFA graph.
 	 * @param source DFA file to read from
@@ -26,6 +38,7 @@ public class DFA {
 		dfa_filename = source.getName();
 		theDfa = new ArrayList<>();
 		inStrings = new ArrayList<>();
+		sigma = new ArrayList<>();
 		
 		try {
 			Scanner input = new Scanner(source);
@@ -43,12 +56,13 @@ public class DFA {
 				}
 				else if (index == 1) { // Reading sigma
 					data = data.substring(6); // Remove the "Sigma:"
-					String[] vals = data.split("    ");
-					sigma = new char[vals.length];
+					data = data.replaceAll("\\s+", " "); // Remove excess spaces
+					data = data.trim();
+					String[] vals = data.split(" ");
 					
 					// Instantiate the sigma chars
 					for (int i = 0; i < vals.length; i++) {
-						sigma[i] = vals[i].charAt(0);
+						sigma.add(vals[i].charAt(0));
 					}
 				}
 				else if (data.contains("---")) {
@@ -80,6 +94,9 @@ public class DFA {
 						exitStates.add(Integer.parseInt(s));
 					}
 				}
+				else if (inStrings.isEmpty() && data.isEmpty()) {
+					inStrings.add("");
+				}
 				else if (!data.isEmpty()) { // Read input strings
 					inStrings.add(data);
 				}
@@ -92,9 +109,101 @@ public class DFA {
 	}
 	
 	/**
+	 * Calculates the minimized DFA.
+	 */
+	private void calculateMinimized() {
+		// TODO: Calculate minimized DFA
+		minDfa = new ArrayList<>();
+		acceptingStates = new ArrayList<>();
+	}
+	
+	/**
+	 * Tests if a string can pass through a DFA.
+	 * @param dfa DFA graph to parse through
+	 * @param grammar String to parse
+	 * @return true if grammar ends on an exit state
+	 */
+	private boolean parseString(ArrayList<ArrayList<Integer>> dfa, String grammar) {
+		// TODO: Parse a string on provided DFA
+		return false;
+	}
+	
+	/**
 	 * Outputs the results to the console.
 	 */
 	public void output() {
-		System.out.println("\nParsing results of " + dfa_filename + " on strings attached in " + dfa_filename + ":");
+		System.out.println("\nParsing results of " + dfa_filename + 
+				" on strings attached in " + dfa_filename + ":");
+		
+		// Parse provided strings on provided DFA
+		ArrayList<ArrayList<Boolean>> strResults = new ArrayList<>();
+		int index = 0;
+		
+		strResults.add(new ArrayList<>());
+		
+		for (String s: inStrings) {
+			// If the results pass 15, make a new line
+			if (strResults.get(index).size() == 15) {
+				index++;
+				strResults.add(new ArrayList<>());
+			}
+			// Add the result to the list
+			strResults.get(index).add(parseString(theDfa, s));
+		}
+		
+		int numYes = 0;
+		int numNo  = 0;
+		
+		// Output the results of the parsed string
+		for (int i = 0; i < strResults.size(); i++) {
+			System.out.print(" ");
+			for (int j = 0; j < strResults.get(i).size(); j++) {
+				// Display Yes
+				if (strResults.get(i).get(j) == true) {
+					System.out.print("Yes  ");
+					numYes++;
+				}
+				// Display No
+				else {
+					System.out.print("No   ");
+					numNo++;
+				}
+			}
+			System.out.println();
+		}
+		System.out.println("\nYes:" + numYes + " No:" + numNo);
+		
+		// Display minimized DFA header
+		System.out.println("\nMinimized DFA from " + dfa_filename + ":");
+		System.out.print(" Sigma:");
+		
+		for (int i = 0; i < sigma.size(); i++) {
+			System.out.format("%5c", sigma.get(i));
+		}
+		
+		// Display line separator
+		System.out.print("\n ------");
+		for (int i = 0; i < sigma.size(); i++) {
+			System.out.print("-----");
+		}
+		System.out.println();
+		
+		calculateMinimized();
+		
+		// Display the actual minimized DFA
+		for (int i = 0; i < minDfa.size(); i++) {
+			System.out.format("%6d:", i);
+			for (int j = 0; j < minDfa.get(i).size(); j++) {
+				System.out.format("%5d", minDfa.get(i).get(j));
+			}
+			System.out.println();
+		}
+		
+		// Display line separator
+		System.out.print(" ------");
+		for (int i = 0; i < sigma.size(); i++) {
+			System.out.print("-----");
+		}
+		System.out.println();
 	}
 }
