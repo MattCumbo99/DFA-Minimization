@@ -115,17 +115,44 @@ public class DFA {
 		// TODO: Calculate minimized DFA
 		minDfa = new ArrayList<>();
 		acceptingStates = new ArrayList<>();
+		
 	}
 	
 	/**
 	 * Tests if a string can pass through a DFA.
 	 * @param dfa DFA graph to parse through
+	 * @param isMinimized Put true if the provided DFA is minimized
 	 * @param grammar String to parse
 	 * @return true if grammar ends on an exit state
 	 */
-	private boolean parseString(ArrayList<ArrayList<Integer>> dfa, String grammar) {
+	private boolean parseString(ArrayList<ArrayList<Integer>> dfa, boolean isMinimized, String grammar) {
 		// TODO: Parse a string on provided DFA
-		return false;
+		int curState;
+		char curChar;
+		
+		if (isMinimized) 
+			curState = 0;
+		else 
+			curState = initialState;
+		
+		// Traverse each character
+		for (int i = 0; i < grammar.length(); i++) {
+			curChar = grammar.charAt(i);
+			// Found an invalid character
+			if (!sigma.contains(curChar)) {
+				return false;
+			}
+			
+			if (!isMinimized) 
+				curState = theDfa.get(curState).get(sigma.indexOf(curChar));
+			else
+				curState = minDfa.get(curState).get(sigma.indexOf(curChar));
+		}
+		
+		if (!isMinimized)
+			return exitStates.contains(curState);
+		else
+			return acceptingStates.contains(curState);
 	}
 	
 	/**
@@ -149,7 +176,7 @@ public class DFA {
 				strResults.add(new ArrayList<>());
 			}
 			// Add the result to the list
-			strResults.get(index).add(parseString(theDfa, s));
+			strResults.get(index).add(parseString(theDfa, false, s));
 		}
 		
 		int numYes = 0;
@@ -182,9 +209,10 @@ public class DFA {
 		for (int i = 0; i < sigma.size(); i++) {
 			System.out.format("%5c", sigma.get(i));
 		}
+		System.out.println();
 		
 		// Display line separator
-		System.out.print("\n ------");
+		System.out.print(" ------");
 		for (int i = 0; i < sigma.size(); i++) {
 			System.out.print("-----");
 		}
@@ -242,7 +270,8 @@ public class DFA {
 				strResults.add(new ArrayList<>());
 			}
 			// Add the result to the list
-			strResults.get(index).add(parseString(minDfa, s));
+			if (!minDfa.isEmpty())
+				strResults.get(index).add(parseString(minDfa, true, s));
 		}
 		numYes = 0;
 		numNo  = 0;
