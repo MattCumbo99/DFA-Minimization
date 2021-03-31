@@ -126,7 +126,6 @@ public class DFA {
 	 * @return true if grammar ends on an exit state
 	 */
 	private boolean parseString(ArrayList<ArrayList<Integer>> dfa, boolean isMinimized, String grammar) {
-		// TODO: Parse a string on provided DFA
 		int curState;
 		char curChar;
 		
@@ -163,7 +162,7 @@ public class DFA {
 				" on strings attached in " + dfa_filename + ":");
 		
 		// Parse provided strings on provided DFA
-		// XXX: This code is reused twice. Put into a method.
+		// TODO: This code is reused twice. Put into a method.
 		ArrayList<ArrayList<Boolean>> strResults = new ArrayList<>();
 		int index = 0;
 		
