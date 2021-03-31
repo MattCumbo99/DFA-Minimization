@@ -13,7 +13,10 @@ public class DFA {
 	private ArrayList<ArrayList<Integer>> theDfa;
 	// Initial state
 	private int initialState;
-	
+	// Accepting states
+	private ArrayList<Integer> exitStates;
+	// List of input strings
+	private ArrayList<String> inStrings;
 	
 	/**
 	 * Creates a new DFA graph.
@@ -22,6 +25,7 @@ public class DFA {
 	public DFA(File source) {
 		dfa_filename = source.getName();
 		theDfa = new ArrayList<>();
+		inStrings = new ArrayList<>();
 		
 		try {
 			Scanner input = new Scanner(source);
@@ -62,10 +66,22 @@ public class DFA {
 					}
 				}
 				else if (data.contains("Initial State")) {
-					initialState = Integer.parseInt(data.replaceAll("(\\d+).+", "$1"));
+					// Remove the initial state text
+					data = data.replace(": Initial State", "");
+					initialState = Integer.parseInt(data);
 				}
 				else if (data.contains("Accepting State(s)")) {
+					// Remove the accepting state text
+					data = data.replace(": Accepting State(s)", "");
+					nums = data.split(",");
+					exitStates = new ArrayList<>();
 					
+					for (String s: nums) {
+						exitStates.add(Integer.parseInt(s));
+					}
+				}
+				else if (!data.isEmpty()) { // Read input strings
+					inStrings.add(data);
 				}
 				index++;
 			}
