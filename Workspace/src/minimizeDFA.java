@@ -10,9 +10,14 @@ public class minimizeDFA {
 		}
 		
 		File source = new File(args[0]);
-		DFA theDFA = new DFA(source);
+		if (source.exists()) {
+			DFA theDFA = new DFA(source);
+			theDFA.output();
+		}
+		else {
+			System.err.println("Error: File " + source.getAbsolutePath() + " does not exist.");
+		}
 		
-		theDFA.output();
 	}
 
 }
