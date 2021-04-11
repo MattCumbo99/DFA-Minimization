@@ -241,7 +241,6 @@ public class DFA {
 			
 			// If the two last sets are similar, then we are done minimizing
 			if (pset.get(index).equals(pset.get(index+1))) {
-				//pset.remove(index+1);
 				//System.out.println("Result: " + sortSet(pset.get(index)).toString());
 				isFinished = true;
 			}
@@ -250,10 +249,35 @@ public class DFA {
 			}
 		}
 		
+		// Partitioned sets for the minimized DFA
 		ArrayList<ArrayList<Integer>> miniDfa = (ArrayList<ArrayList<Integer>>) sortSet(pset.get(index)).clone();
 		
-		// TODO: Write to DFA
-		
+		// Write to the minimum DFA data:
+		// Check each partitioned state
+		for (int i = 0; i < miniDfa.size(); i++) {
+			// First state of the current partition
+			int curIndex = miniDfa.get(i).get(0);
+			int lastSpot = minDfa.size();
+			
+			// Determine if the current state is an accepting state
+			if (exitStates.contains(curIndex)) {
+				acceptingStates.add(i);
+			}
+			
+			minDfa.add(new ArrayList<>());
+			
+			// Travel through each sigma char
+			for (int j = 0; j < sigma.size(); j++) {
+				int resultPath = theDfa.get(curIndex).get(j);
+				
+				// Check each partition until it finds the containing state
+				for (int k = 0; k < miniDfa.size(); k++) {
+					if (miniDfa.get(k).contains(resultPath)) {
+						minDfa.get(lastSpot).add(k);
+					}
+				}
+			}
+		}
 	}
 	
 	/**
