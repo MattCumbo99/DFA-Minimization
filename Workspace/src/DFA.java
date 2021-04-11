@@ -11,23 +11,23 @@ import java.util.Scanner;
 public class DFA {
 	
 	/* Initial DFA variables */
+	// Initial state
+	private int initialState;
 	// Filename of the .dfa
 	private final String dfa_filename;
+	// List of input strings
+	private ArrayList<String> inStrings;
+	// Exit states
+	private ArrayList<Integer> exitStates;
 	// Array of sigma chars
 	private ArrayList<Character> sigma;
 	// DFA data
 	private ArrayList<ArrayList<Integer>> theDfa;
-	// Initial state
-	private int initialState;
-	// Accepting states
-	private ArrayList<Integer> exitStates;
-	// List of input strings
-	private ArrayList<String> inStrings;
 	
 	/* Minimized DFA variables */
 	// Minimized DFA data
 	private ArrayList<ArrayList<Integer>> minDfa;
-	// Exit states
+	// Accepting states
 	private ArrayList<Integer> acceptingStates;
 	
 	/**
@@ -107,14 +107,152 @@ public class DFA {
 			System.err.println("Error: File " + source.getAbsolutePath() + " does not exist.");
 		}
 	}
+
+	/**
+	 * Determines if two states are in the same set.
+	 * @param state1 First state to compare
+	 * @param state2 Second state to compare
+	 * @param set The set of states to check with
+	 * @return true if both states go to the same sets with all sigma characters
+	 */
+	private boolean isSameSet(int state1, int state2, ArrayList<ArrayList<Integer>> set) {
+		int connector1, connector2;
+		
+		// Check each sigma character
+		for (int i = 0; i < sigma.size(); i++) {
+			connector1 = theDfa.get(state1).get(i);
+			connector2 = theDfa.get(state2).get(i);
+			
+			// They are guaranteed to be in the same set if they are the same
+			if (connector1 != connector2) {
+				// Check each set
+				for (int j = 0; j < set.size(); j++) {
+					// When there is a discrepency, they are not in the same set
+					if (set.get(j).contains(connector1) && !set.get(j).contains(connector2)) {
+						return false;
+					}
+					if (set.get(j).contains(connector2) && !set.get(j).contains(connector1)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Sorts a partitioned set.
+	 * @param set Partition to sort
+	 * @return sorted partition
+	 */
+	@SuppressWarnings("unchecked")
+	private ArrayList<ArrayList<Integer>> sortSet(ArrayList<ArrayList<Integer>> set) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+		ArrayList<ArrayList<Integer>> temp = (ArrayList<ArrayList<Integer>>) set.clone();
+		
+		int minVal;
+		int minIndex;
+		while (!temp.isEmpty()) {
+			minVal = temp.get(0).get(0);
+			minIndex = 0;
+			for (int i = 1; i < temp.size(); i++) {
+				if (temp.get(i).get(0) < minVal) {
+					minIndex = i;
+					minVal = temp.get(i).get(0);
+				}
+			}
+			result.add((ArrayList<Integer>) temp.get(minIndex).clone());
+			temp.remove(minIndex);
+		}
+		
+		return result;
+	}
 	
 	/**
 	 * Calculates the minimized DFA.
 	 */
+	@SuppressWarnings("unchecked")
 	private void calculateMinimized() {
-		// TODO: Calculate minimized DFA
-		minDfa = new ArrayList<>();
+		// Initialize array lists
+		minDfa 			= new ArrayList<>();
 		acceptingStates = new ArrayList<>();
+		
+		// Get default states
+		ArrayList<Integer> regStates = new ArrayList<>();
+		for (int i = 0; i < theDfa.size(); i++) {
+			if (!exitStates.contains(i)) {
+				regStates.add(i);
+			}
+		}
+		
+		// Initialize the first partition (exit states and regular states)
+		ArrayList<ArrayList<ArrayList<Integer>>> pset = new ArrayList<>();
+		pset.add(new ArrayList<>());
+		pset.get(0).add((ArrayList<Integer>) exitStates.clone());
+		pset.get(0).add((ArrayList<Integer>) regStates.clone());
+		
+		int index = 0;
+		boolean isFinished = false;
+		
+		// Main operation
+		while (!isFinished) {
+			// Initialize the next set of sets of states
+			pset.add(new ArrayList<>());
+			
+			// Check every set in the current index
+			for (int i = 0; i < pset.get(index).size(); i++) {
+				// Put the first state into its own set
+				int initSize = pset.get(index+1).size();
+				pset.get(index+1).add(new ArrayList<>());
+				pset.get(index+1).get(initSize).add(pset.get(index).get(i).get(0));
+				
+				// Size of the current set
+				int curSize = pset.get(index).get(i).size();
+				// First state of the set
+				int curState = pset.get(index+1).get(initSize).get(0);
+				
+				// Check each state in the current set
+				for (int j = 1; j < curSize; j++) {
+					int secondState = pset.get(index).get(i).get(j);
+					
+					// When they are in the same set, combine them in the next set of sets
+					if (isSameSet(curState, secondState, pset.get(index))) {
+						pset.get(index+1).get(initSize).add(secondState);
+					}
+					else {
+						// When they are not in the same set, check the first state 
+						// of each added set until they are, otherwise add a new set
+						boolean good = true;
+						for (int k = 0; k < pset.get(index+1).size(); k++) {
+							// Check if the first state of this set fits the second state
+							if (isSameSet(pset.get(index+1).get(k).get(0), secondState, pset.get(index))) {
+								pset.get(index+1).get(k).add(secondState);
+								good = false;
+							}
+						}
+						if (good) {
+							// Add a new set
+							pset.get(index+1).add(new ArrayList<>());
+							pset.get(index+1).get(pset.get(index+1).size()-1).add(secondState);
+						}
+					}
+				}
+			}
+			
+			// If the two last sets are similar, then we are done minimizing
+			if (pset.get(index).equals(pset.get(index+1))) {
+				//pset.remove(index+1);
+				//System.out.println("Result: " + sortSet(pset.get(index)).toString());
+				isFinished = true;
+			}
+			else {
+				index++;
+			}
+		}
+		
+		ArrayList<ArrayList<Integer>> miniDfa = (ArrayList<ArrayList<Integer>>) sortSet(pset.get(index)).clone();
+		
+		// TODO: Write to DFA
 		
 	}
 	
