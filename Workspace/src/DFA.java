@@ -464,7 +464,7 @@ public class DFA {
 		
 		// Display minimized DFA closers
 		// Initial state
-		System.out.println(initialState + " : Initial State");
+		System.out.println(" " + initialState + ": Initial State");
 		
 		// Display accepting states
 		if (!acceptingStates.isEmpty()) {
