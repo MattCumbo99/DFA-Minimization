@@ -109,6 +109,60 @@ public class DFA {
 	}
 
 	/**
+	 * Removes any unreachable states from the DFA.
+	 */
+	@SuppressWarnings("unchecked")
+	private void removeUnreachables() {
+		ArrayList<Integer> visited = new ArrayList<>();
+		
+		visited.add(initialState);
+		getReachables(initialState, visited);
+		
+		// Only need to do the remove operation when there actually 
+		// are unreachable states
+		if (visited.size() < theDfa.size()) {
+			visited.sort(null);
+			
+			ArrayList<ArrayList<Integer>> betterList = new ArrayList<>();
+			ArrayList<Integer> betterExits = new ArrayList<>();
+			
+			// Traverse each visited part
+			for (int i = 0; i < visited.size(); i++) {
+				// Add the state that was reached
+				betterList.add((ArrayList<Integer>) theDfa.get(visited.get(i)).clone());
+				// Adjust path directions
+				for (int j = 0; j < sigma.size(); j++) {
+					int adjPath = betterList.get(i).get(j);
+					if (exitStates.contains(adjPath)) {
+						betterExits.add(visited.indexOf(adjPath));
+					}
+					betterList.get(i).set(j, visited.indexOf(adjPath));
+				}
+			}
+			theDfa = (ArrayList<ArrayList<Integer>>) betterList.clone();
+			exitStates = (ArrayList<Integer>) betterExits.clone();
+			exitStates.sort(null);
+		}
+		
+	}
+	
+	/**
+	 * Helper method for removeUnreachables().
+	 * @param state Starting state to test visits
+	 * @param visits ArrayList of each visited state
+	 */
+	private void getReachables(int state, ArrayList<Integer> visits) {
+		// Traverse each sigma char
+		for (int i = 0; i < sigma.size(); i++) {
+			int curState = theDfa.get(state).get(i);
+			if (!visits.contains(curState)) {
+				visits.add(curState);
+				getReachables(curState, visits);
+			}
+		}
+	}
+	
+	/**
 	 * Determines if two states are in the same set.
 	 * @param state1 First state to compare
 	 * @param state2 Second state to compare
@@ -173,6 +227,9 @@ public class DFA {
 	 */
 	@SuppressWarnings("unchecked")
 	private void calculateMinimized() {
+		// Remove any unreachable states
+		removeUnreachables();
+		
 		// Initialize array lists
 		minDfa 			= new ArrayList<>();
 		acceptingStates = new ArrayList<>();
@@ -226,8 +283,12 @@ public class DFA {
 						for (int k = 0; k < pset.get(index+1).size(); k++) {
 							// Check if the first state of this set fits the second state
 							if (isSameSet(pset.get(index+1).get(k).get(0), secondState, pset.get(index))) {
-								pset.get(index+1).get(k).add(secondState);
-								good = false;
+								// Make sure both of the sets are either exits or not
+								if (exitStates.contains(pset.get(index+1).get(k).get(0)) == 
+									exitStates.contains(secondState)) {
+									pset.get(index+1).get(k).add(secondState);
+									good = false;
+								}
 							}
 						}
 						if (good) {
@@ -250,6 +311,7 @@ public class DFA {
 		}
 		
 		// Partitioned sets for the minimized DFA
+		// Sorts the partitions based on the first number
 		ArrayList<ArrayList<Integer>> miniDfa = (ArrayList<ArrayList<Integer>>) sortSet(pset.get(index)).clone();
 		
 		// Write to the minimum DFA data:
@@ -304,6 +366,7 @@ public class DFA {
 				return false;
 			}
 			
+			// Traverse the regular DFA if it isn't minimized
 			if (!isMinimized) 
 				curState = theDfa.get(curState).get(sigma.indexOf(curChar));
 			else
