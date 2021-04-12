@@ -387,7 +387,7 @@ public class DFA {
 				" on strings attached in " + dfa_filename + ":");
 		
 		// Parse provided strings on provided DFA
-		// TODO: This code is reused twice. Put into a method.
+		// This code is reused twice. I should put this in a method...
 		ArrayList<ArrayList<Boolean>> strResults = new ArrayList<>();
 		int index = 0;
 		
@@ -464,8 +464,7 @@ public class DFA {
 		
 		// Display minimized DFA closers
 		// Initial state
-		// XXX: Always assumes initial state is 0!
-		System.out.println(" 0: Initial State");
+		System.out.println(initialState + " : Initial State");
 		
 		// Display accepting states
 		if (!acceptingStates.isEmpty()) {
