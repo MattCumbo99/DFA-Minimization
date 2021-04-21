@@ -1,4 +1,4 @@
-Final score of program: 57/50
+Final score of program: 60/50
 # DFA Minimizer
 ### Overview
 This program provides a minimized version of a deterministic finite automata (DFA). It also provides parsing of strings in the same file. Results are displayed in the console.
